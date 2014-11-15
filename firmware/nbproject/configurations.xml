@@ -54,6 +54,7 @@
                      projectFiles="true">
         <itemPath>../../imageproc-lib/ams-enc.c</itemPath>
         <itemPath>../../imageproc-lib/at86rf231_driver.c</itemPath>
+        <itemPath>../../imageproc-lib/battery.c</itemPath>
         <itemPath>../../imageproc-lib/carray.c</itemPath>
         <itemPath>../../imageproc-lib/dfmem.c</itemPath>
         <itemPath>../../imageproc-lib/mac_packet.c</itemPath>
@@ -162,7 +163,7 @@
         <property key="optimization-level" value="0"/>
         <property key="post-instruction-scheduling" value="default"/>
         <property key="pre-instruction-scheduling" value="default"/>
-        <property key="preprocessor-macros" value=""/>
+        <property key="preprocessor-macros" value="__IMAGEPROC2"/>
         <property key="scalar-model" value="default"/>
         <property key="use-cci" value="false"/>
         <property key="use-iar" value="false"/>
@@ -295,6 +296,7 @@
         <property key="UART 1" value="true"/>
         <property key="UART 2" value="true"/>
         <property key="debugoptions.useswbreakpoints" value="false"/>
+        <property key="firmware.download.all" value="false"/>
         <property key="hwtoolclock.frcindebug" value="false"/>
         <property key="hwtoolclock.instructionspeed" value="4"/>
         <property key="hwtoolclock.units" value="mips"/>
