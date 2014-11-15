@@ -19,6 +19,7 @@ def main():
     #  [ Kp , Ki , Kd , Kaw , Kff     ,  Kp , Ki , Kd , Kaw , Kff ]
     #    ----------LEFT----------        ---------_RIGHT----------
     motorgains = [1800,200,100,0,0, 1800,200,100,0,0]
+    #motorgains = [0,0,0,0,0, 0,0,0,0,0]
     duration = 500
     rightFreq = 0
     leftFreq = 0

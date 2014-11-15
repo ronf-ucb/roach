@@ -3,11 +3,11 @@ xb = []
 ser = []
 
 #Base station
-BS_COMPORT = 'COM4'
-BS_BAUDRATE = 111111
+#BS_COMPORT = 'COM4'
+#BS_BAUDRATE = 111111
 #XBee
-# BS_COMPORT = 'COM2'
-# BS_BAUDRATE = 57600
+BS_COMPORT = 'COM3'
+BS_BAUDRATE = 57600
 
 motor_gains_set = False
 steering_gains_set = False
