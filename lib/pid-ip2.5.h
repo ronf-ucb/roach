@@ -58,6 +58,8 @@ typedef struct
 	unsigned long expire;		// end of current segment
 	int index;					// right index to moves
 	int leg_stride;
+        unsigned char p_state_flip;
+        unsigned char output_channel;
 } pidPos;
 
 // structure for velocity control of leg cycle
