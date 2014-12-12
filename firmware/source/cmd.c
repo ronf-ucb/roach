@@ -28,9 +28,9 @@
 unsigned char (*cmd_func[MAX_CMD_FUNC])(unsigned char, unsigned char, unsigned char, unsigned char*);
 void cmdError(void);
 
-extern pidPos pidObjs[NUM_PIDS];
-extern EncObj encPos[NUM_ENC];
-extern volatile CircArray fun_queue;
+//extern pidPos pidObjs[NUM_PIDS];
+//extern EncObj encPos[NUM_ENC];
+//extern volatile CircArray fun_queue;
 
 /*-----------------------------------------------------------------------------
  *          Declaration of static functions
@@ -84,6 +84,8 @@ void cmdSetup(void) {
 
 }
 
+//TODO: cmdPushFunc is deprecated, to be removed.
+/*
 void cmdPushFunc(MacPacket rx_packet) {
     Payload rx_payload;
     unsigned char command;
@@ -100,7 +102,7 @@ void cmdPushFunc(MacPacket rx_packet) {
         }
     }
 }
-
+*/
 
 // send robot info when queried
 unsigned char cmdWhoAmI(unsigned char type, unsigned char status, unsigned char length, unsigned char *frame) {
@@ -120,11 +122,8 @@ unsigned char cmdWhoAmI(unsigned char type, unsigned char status, unsigned char 
 unsigned char cmdGetAMSPos(unsigned char type, unsigned char status,
         unsigned char length, unsigned char *frame) {
     long motor_count[2];
-    motor_count[0] = pidObjs[0].p_state;
-    motor_count[1] = pidObjs[1].p_state;
-
-    // motor_count[0] = encPos[0].pos;
-    // motor_count[1] = encPos[1].pos;
+    motor_count[0] = pidGetPState(0);
+    motor_count[1] = pidGetPState(1);
 
     radioSendData(RADIO_DST_ADDR, status, CMD_GET_AMS_POS,  //TODO: Robot should respond to source of query, not hardcoded address
             sizeof(motor_count), (unsigned char *)motor_count, 0);
@@ -136,7 +135,8 @@ unsigned char cmdStartTimedRun(unsigned char type, unsigned char status, unsigne
     unsigned int run_time = frame[0] + (frame[1] << 8);
     int i;
     for (i = 0; i < NUM_PIDS; i++){
-        pidObjs[i].timeFlag = 1;
+        pidSetTimeFlag(i,1);
+        //pidObjs[i].timeFlag = 1;
         pidSetInput(i, 0);
         checkSwapBuff(i);
         pidOn(i);
@@ -276,27 +276,26 @@ unsigned char cmdSetVelProfile(unsigned char type, unsigned char status, unsigne
 }
 
 unsigned char cmdPIDStartMotors(unsigned char type, unsigned char status, unsigned char length, unsigned char *frame) {
-    pidObjs[0].timeFlag = 0;
-    pidObjs[1].timeFlag = 0;
-    pidSetInput(0, 0);
-    pidObjs[0].p_input = pidObjs[0].p_state;
-    pidOn(0);
-    pidSetInput(1, 0);
-    pidObjs[1].p_input = pidObjs[1].p_state;
-    pidOn(1);
+
+    //All actions have been moved to a PID module function
+    pidStartMotor(0);
+    pidStartMotor(1);
+
     return 1;
 }
 
 unsigned char cmdPIDStopMotors(unsigned char type, unsigned char status, unsigned char length, unsigned char *frame) {
-    pidObjs[0].onoff = 0;
-    pidObjs[1].onoff = 0;
+
+    pidOff(0);
+    pidOff(1);
+
     return 1;
 }
 
 unsigned char cmdZeroPos(unsigned char type, unsigned char status, unsigned char length, unsigned char *frame) {
     long motor_count[2];
-    motor_count[0] = pidObjs[0].p_state;
-    motor_count[1] = pidObjs[1].p_state;
+    motor_count[0] = pidGetPState(0);
+    motor_count[1] = pidGetPState(1);
 
     radioSendData(RADIO_DST_ADDR, status, CMD_GET_AMS_POS,  //TODO: Robot should respond to source of query, not hardcoded address
         sizeof(motor_count), (unsigned char *)motor_count, 0);
@@ -311,10 +310,16 @@ unsigned char cmdSetPhase(unsigned char type, unsigned char status, unsigned cha
     {
         offset += (frame[i] << 8*i );
     }
-    error = offset - ((pidObjs[0].p_state & 0x0000FFFF) - (pidObjs[1].p_state & 0x0000FFFF)); 
+
+    long p_state[2];
+    p_state[0] = pidGetPState(0);
+    p_state[1] = pidGetPState(1);
     
-    pidObjs[0].p_input = pidObjs[0].p_state + error/2;
-    pidObjs[1].p_input = pidObjs[1].p_state - error/2;
+    error = offset - ( (p_state[0] & 0x0000FFFF) - (p_state[1] & 0x0000FFFF) );
+
+    pidSetPInput(p_state[0] + error/2);
+    pidSetPInput(p_state[1] - error/2);
+
     return 1;
 }
 

@@ -29,6 +29,8 @@
 #endif
 
 //Structures and enums
+#define PID_OFF     0
+#define PID_ON      1
 
 // pid type for leg control
 typedef struct
@@ -89,7 +91,13 @@ void pidSetControl();
 void EmergencyStop(void);
 unsigned char* pidGetTelemetry(void);
 void pidOn(int pid_num);
+void pidOff(int pid_num);
 void pidZeroPos(int pid_num);
 void calibBatteryOffset(int spindown_ms);
+long pidGetPState(unsigned int channel);
+void pidSetPInput(unsigned int channel, long p_input);
+void pidStartMotor(unsigned int channel);
+void pidSetTimeFlag(unsigned int channel, char val);
+void pidSetMode(unsigned int channel, char mode);
 
 #endif // __PID_H

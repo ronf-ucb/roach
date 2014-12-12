@@ -237,7 +237,12 @@ void pidSetGains(int pid_num, int Kp, int Ki, int Kd, int Kaw, int ff) {
 }
 
 void pidOn(int pid_num) {
-    pidObjs[pid_num].onoff = 1;
+    pidObjs[pid_num].onoff = PID_ON;
+    t1_ticks = 0;
+}
+
+void pidOff(int pid_num) {
+    pidObjs[pid_num].onoff = PID_OFF;
     t1_ticks = 0;
 }
 
@@ -606,4 +611,43 @@ void UpdatePID(pidPos *pid) {
     }
 }
 
+//TODO: Controller design, this function was created specifically to remove existing externs.
+long pidGetPState(unsigned int channel) {
+    if (channel < NUM_PIDS) {
+        return pidObjs[channel].p_state;
+    } else {
+        return 0;
+    }
+}
 
+//TODO: Controller design, this function was created specifically to remove existing externs.
+void pidSetPInput(unsigned int channel, long p_input) {
+    if (channel < NUM_PIDS) {
+        pidObjs[channel].p_input = p_input;
+    }
+}
+
+//TODO: Controller design, this function was created specifically to remove existing externs.
+void pidStartMotor(unsigned int channel){
+    if (channel < NUM_PIDS) {
+        pidObjs[channel].timeFlag = 0;
+        pidSetInput(channel, 0);
+        pidObjs[channel].p_input = pidObjs[channel].p_state;
+        pidOn(channel);
+    }
+
+}
+
+//TODO: Controller design, this function was created specifically to remove existing externs.
+void pidSetTimeFlag(unsigned int channel, char val){
+    if (channel < NUM_PIDS) {
+        pidObjs[channel].timeFlag = val;
+    }
+}
+
+//TODO: Controller design, this function was created specifically to remove existing externs.
+void pidSetMode(unsigned int channel, char mode){
+    if (channel < NUM_PIDS) {
+        pidObjs[channel].mode = mode;
+    }
+}
