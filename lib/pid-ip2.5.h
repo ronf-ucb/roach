@@ -24,43 +24,47 @@
 // K_EMF = ((256 * 140) / 834)  =43
 #define K_EMF 43
 
-#ifndef ADC_MAX
-#define ADC_MAX             1024
-#endif
+//#ifndef ADC_MAX
+//#define ADC_MAX             1024
+//#endif
 
 //Structures and enums
 #define PID_OFF     0
 #define PID_ON      1
 
+#define PID_MODE_CONTROLED  0
+#define PID_MODE_PWMPASS    1
+
 // pid type for leg control
 typedef struct
 {
-	long p_input;	// reference position input - [16].[16]
-	long p_state;	// current position
-	long p_error;  // position error
-	int v_input; // reference velocity input
-	int v_state; // current velocity
-	int v_error; // velocity error
-	long i_error; // integral error
-	long  p, i, d;   // control contributions from position, integral, and derivative gains respectively
-  	long preSat; // output value before saturations
-	int  output;	 //  control output u
- 	char onoff; //boolean
- 	char mode; //Motor mode: 1 iff PWM open loop control
- 	int pwmDes; // Desired PWM
+	long p_input;                   // reference position input - [16].[16]
+	long p_state;                   // current position
+	long p_error;                   // position error
+	int v_input;                    // reference velocity input
+	int v_state;                    // current velocity
+	int v_error;                    // velocity error
+	long i_error;                   // integral error
+	long  p, i, d;                  // control contributions from position, integral, and derivative gains respectively
+  	long preSat;                    // output value before saturations
+	int  output;                    //  control output u
+ 	char onoff;                     //boolean
+        //TODO: Replace mode with 'bypass' bit?
+ 	char mode;                      //Motor mode: 1 iff PWM open loop control
+ 	int pwmDes;                     // Desired PWM
  	char timeFlag;
 	unsigned long run_time;
 	unsigned long start_time;
-	int inputOffset;  // BEMF setpoint offset
+	int inputOffset;                // BEMF setpoint offset
 	int feedforward;
-    int Kp, Ki, Kd;
-	int Kaw;  // anti-windup gain
+        int Kp, Ki, Kd;
+	int Kaw;                        // anti-windup gain
 	//Leg control variables
-	long interpolate;  				// intermediate value between setpoints
+	long interpolate;  		// intermediate value between setpoints
 	unsigned long expire;		// end of current segment
-	int index;					// right index to moves
+	int index;			// right index to moves
 	int leg_stride;
-        unsigned char p_state_flip;
+        unsigned char p_state_flip;     //boolean; flip or do not flip
         unsigned char output_channel;
 } pidPos;
 
@@ -99,5 +103,6 @@ void pidSetPInput(unsigned int channel, long p_input);
 void pidStartMotor(unsigned int channel);
 void pidSetTimeFlag(unsigned int channel, char val);
 void pidSetMode(unsigned int channel, char mode);
+void pidSetPWMDes(unsigned int channel, int pwm);
 
 #endif // __PID_H

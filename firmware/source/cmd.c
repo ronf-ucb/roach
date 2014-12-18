@@ -30,7 +30,7 @@ void cmdError(void);
 
 //extern pidPos pidObjs[NUM_PIDS];
 //extern EncObj encPos[NUM_ENC];
-//extern volatile CircArray fun_queue;
+extern volatile CircArray fun_queue;
 
 /*-----------------------------------------------------------------------------
  *          Declaration of static functions
@@ -85,7 +85,6 @@ void cmdSetup(void) {
 }
 
 //TODO: cmdPushFunc is deprecated, to be removed.
-/*
 void cmdPushFunc(MacPacket rx_packet) {
     Payload rx_payload;
     unsigned char command;
@@ -102,7 +101,7 @@ void cmdPushFunc(MacPacket rx_packet) {
         }
     }
 }
-*/
+
 
 // send robot info when queried
 unsigned char cmdWhoAmI(unsigned char type, unsigned char status, unsigned char length, unsigned char *frame) {
@@ -141,7 +140,9 @@ unsigned char cmdStartTimedRun(unsigned char type, unsigned char status, unsigne
         checkSwapBuff(i);
         pidOn(i);
     }
-    pidObjs[0].mode = 0;
+    
+    pidSetMode(LEFT_LEGS_PID_NUM ,PID_MODE_CONTROLED);
+
     pidStartTimedTrial(run_time);
 
     return 1;
@@ -199,10 +200,15 @@ unsigned char cmdSetThrustOpenLoop(unsigned char type, unsigned char status, uns
     int thrust1 = frame[0] + (frame[1] << 8);
     int thrust2 = frame[2] + (frame[3] << 8);
 
-    pidObjs[0].pwmDes = thrust1;
-    pidObjs[1].pwmDes = thrust2;
+    //pidObjs[0].pwmDes = thrust1;
+    //pidObjs[1].pwmDes = thrust2;
+    //pidObjs[0].mode = 1;
+    pidSetPWMDes(0, thrust1);
+    pidSetPWMDes(0, thrust2);
 
-    pidObjs[0].mode = 1;
+    pidSetMode(0,1);
+
+    return 1;
  }
 
  unsigned char cmdSetPIDGains(unsigned char type, unsigned char status, unsigned char length, unsigned char *frame) {
@@ -312,13 +318,13 @@ unsigned char cmdSetPhase(unsigned char type, unsigned char status, unsigned cha
     }
 
     long p_state[2];
-    p_state[0] = pidGetPState(0);
-    p_state[1] = pidGetPState(1);
+    p_state[0] = pidGetPState(LEFT_LEGS_PID_NUM);
+    p_state[1] = pidGetPState(RIGHT_LEGS_PID_NUM);
     
     error = offset - ( (p_state[0] & 0x0000FFFF) - (p_state[1] & 0x0000FFFF) );
 
-    pidSetPInput(p_state[0] + error/2);
-    pidSetPInput(p_state[1] - error/2);
+    pidSetPInput(LEFT_LEGS_PID_NUM, p_state[0] + error/2);
+    pidSetPInput(RIGHT_LEGS_PID_NUM, p_state[1] - error/2);
 
     return 1;
 }

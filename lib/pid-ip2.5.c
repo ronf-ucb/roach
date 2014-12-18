@@ -175,7 +175,7 @@ void initPIDObjPos(pidPos *pid, int Kp, int Ki, int Kd, int Kaw, int ff) {
     pid->v_error = 0;
     pid->i_error = 0;
 
-    pid->p_state_flip = 0;
+    pid->p_state_flip = 0; //default to no flip
     pid->output_channel = 0;
 }
 
@@ -383,17 +383,6 @@ void __attribute__((interrupt, no_auto_psv)) _T1Interrupt(void) {
             tiHSetDC(pidObjs[1].output_channel, pidObjs[1].pwmDes);
         }
 
-        //TODO: This is vestigial UART code that needs to be moved
-        if (pidObjs[0].onoff) {            
-            // uart_tx_packet = ppoolRequestFullPacket(sizeof(telemStruct_t));
-            // if(uart_tx_packet != NULL) {
-            //     //time|Left pstate|Right pstate|Commanded Left pstate| Commanded Right pstate|DCR|DCL|RBEMF|LBEMF|Gyrox|Gyroy|Gyroz|Ax|Ay|Az
-            //     //bytes: 4,4,4,4,4,2,2,2,2,2,2,2,2,2,2
-            //     paySetType(uart_tx_packet->payload, CMD_PID_TELEMETRY);
-            //     paySetStatus(uart_tx_packet->payload, 0);
-            //     paySetData(uart_tx_packet->payload, sizeof(telemStruct_t), (unsigned char *) &telemPIDdata);
-            //     uart_tx_flag = 1;
-        }
     }
     LED_3 = 0;
     _T1IF = 0;
@@ -649,5 +638,11 @@ void pidSetTimeFlag(unsigned int channel, char val){
 void pidSetMode(unsigned int channel, char mode){
     if (channel < NUM_PIDS) {
         pidObjs[channel].mode = mode;
+    }
+}
+
+void pidSetPWMDes(unsigned int channel, int pwm){
+    if (channel < NUM_PIDS) {
+        pidObjs[channel].pwmDes = pwm;
     }
 }
