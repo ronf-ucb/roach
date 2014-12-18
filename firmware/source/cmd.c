@@ -124,11 +124,12 @@ unsigned char cmdWhoAmI(unsigned char type, unsigned char status, unsigned char 
 unsigned char cmdGetAMSPos(unsigned char type, unsigned char status,
         unsigned char length, unsigned char *frame) {
     long motor_count[2];
-    motor_count[0] = pidGetPState(0);
-    motor_count[1] = pidGetPState(1);
+    motor_count[0] = pidGetPState(LEFT_LEGS_PID_NUM);
+    motor_count[1] = pidGetPState(RIGHT_LEGS_PID_NUM);
 
     radioSendData(RADIO_DST_ADDR, status, CMD_GET_AMS_POS,  //TODO: Robot should respond to source of query, not hardcoded address
             sizeof(motor_count), (unsigned char *)motor_count, 0);
+
     return 1;
 }
 // ==== Flash/Experiment Commands ==============================================================================
@@ -189,7 +190,6 @@ unsigned char cmdSetThrustOpenLoop(unsigned char type, unsigned char status, uns
 
     tiHSetDC(argsPtr->channel, argsPtr->dc);
 
-
     EnableIntT1;
     return 1;
  } 
@@ -199,10 +199,10 @@ unsigned char cmdSetMotorMode(unsigned char type, unsigned char status, unsigned
     PKT_UNPACK(_args_cmdSetMotorMode, argsPtr, frame);
 
 
-    pidSetPWMDes(0, argsPtr->thrust1);
-    pidSetPWMDes(0, argsPtr->thrust2);
+    pidSetPWMDes(LEFT_LEGS_PID_NUM, argsPtr->thrust1);
+    pidSetPWMDes(RIGHT_LEGS_PID_NUM, argsPtr->thrust2);
 
-    pidSetMode(0,1);
+    pidSetMode(LEFT_LEGS_PID_NUM,1);
 
     return 1;
  }
@@ -210,8 +210,11 @@ unsigned char cmdSetMotorMode(unsigned char type, unsigned char status, unsigned
 unsigned char cmdSetPIDGains(unsigned char type, unsigned char status, unsigned char length, unsigned char *frame) {
     //Unpack unsigned char* frame into structured values
     PKT_UNPACK(_args_cmdSetPIDGains, argsPtr, frame);
-    pidSetGains(0,argsPtr->Kp1,argsPtr->Ki1,argsPtr->Kd1,argsPtr->Kaw1, argsPtr->Kff1);
-    pidSetGains(1,argsPtr->Kp2,argsPtr->Ki2,argsPtr->Kd2,argsPtr->Kaw2, argsPtr->Kff2);
+    pidSetGains(LEFT_LEGS_PID_NUM,
+            argsPtr->Kp1,argsPtr->Ki1,argsPtr->Kd1,argsPtr->Kaw1, argsPtr->Kff1);
+
+    pidSetGains(LEFT_LEGS_PID_NUM,
+            argsPtr->Kp2,argsPtr->Ki2,argsPtr->Kd2,argsPtr->Kaw2, argsPtr->Kff2);
 
     radioSendData(RADIO_DST_ADDR, status, CMD_SET_PID_GAINS, length, frame, 0); //TODO: Robot should respond to source of query, not hardcoded address
     //Send confirmation packet
@@ -242,8 +245,8 @@ unsigned char cmdSetVelProfile(unsigned char type, unsigned char status, unsigne
         vel2[i] = delta2[i] / interval2[i];
     }
 
-    setPIDVelProfile(0, interval1, delta1, vel1, argsPtr->flagLeft);
-    setPIDVelProfile(1, interval2, delta2, vel2, argsPtr->flagRight);
+    setPIDVelProfile(LEFT_LEGS_PID_NUM, interval1, delta1, vel1, argsPtr->flagLeft);
+    setPIDVelProfile(RIGHT_LEGS_PID_NUM, interval2, delta2, vel2, argsPtr->flagRight);
 
     //Send confirmation packet
     // TODO : Send confirmation packet with packet index
@@ -253,16 +256,16 @@ unsigned char cmdSetVelProfile(unsigned char type, unsigned char status, unsigne
 unsigned char cmdPIDStartMotors(unsigned char type, unsigned char status, unsigned char length, unsigned char *frame) {
 
     //All actions have been moved to a PID module function
-    pidStartMotor(0);
-    pidStartMotor(1);
+    pidStartMotor(LEFT_LEGS_PID_NUM);
+    pidStartMotor(RIGHT_LEGS_PID_NUM);
 
     return 1;
 }
 
 unsigned char cmdPIDStopMotors(unsigned char type, unsigned char status, unsigned char length, unsigned char *frame) {
 
-    pidOff(0);
-    pidOff(1);
+    pidOff(LEFT_LEGS_PID_NUM);
+    pidOff(RIGHT_LEGS_PID_NUM);
 
     return 1;
 }
@@ -274,7 +277,10 @@ unsigned char cmdZeroPos(unsigned char type, unsigned char status, unsigned char
 
     radioSendData(RADIO_DST_ADDR, status, CMD_GET_AMS_POS,  //TODO: Robot should respond to source of query, not hardcoded address
         sizeof(motor_count), (unsigned char *)motor_count, 0);
-    pidZeroPos(0); pidZeroPos(1);
+
+    pidZeroPos(LEFT_LEGS_PID_NUM);
+    pidZeroPos(RIGHT_LEGS_PID_NUM);
+    
     return 1;
 }
 
