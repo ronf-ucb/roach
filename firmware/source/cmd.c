@@ -228,8 +228,6 @@ unsigned char cmdSetVelProfile(unsigned char type, unsigned char status, unsigne
     int interval1[NUM_VELS], vel1[NUM_VELS], delta1[NUM_VELS];
     int interval2[NUM_VELS], vel2[NUM_VELS], delta2[NUM_VELS];
     int i;
-        }
-    onceFlag = frame[idx] + (frame[idx + 1]<<8);
 
     for(i = 0; i < NUM_VELS; i++){
         delta1[i] = argsPtr->deltaL[i] << 2;
@@ -284,11 +282,11 @@ unsigned char cmdSetPhase(unsigned char type, unsigned char status, unsigned cha
     //Unpack unsigned char* frame into structured values
     PKT_UNPACK(_args_cmdSetPhase, argsPtr, frame);
 
-	long p_state[2];
+    long p_state[2], error;
     p_state[0] = pidGetPState(LEFT_LEGS_PID_NUM);
     p_state[1] = pidGetPState(RIGHT_LEGS_PID_NUM);
     
-    error = offset - ( (p_state[0] & 0x0000FFFF) - (p_state[1] & 0x0000FFFF) );
+    error = argsPtr->offset - ( (p_state[0] & 0x0000FFFF) - (p_state[1] & 0x0000FFFF) );
 
     pidSetPInput(LEFT_LEGS_PID_NUM, p_state[0] + error/2);
     pidSetPInput(RIGHT_LEGS_PID_NUM, p_state[1] - error/2);
