@@ -51,7 +51,10 @@ volatile unsigned char uart_tx_flag;
 volatile CircArray fun_queue;
 
 int main() {
-
+unsigned char payloadType;
+unsigned char payloadStatus;
+unsigned char payloadDataLength;
+unsigned char* payloadData;
     // Processor Initialization
     SetupClock();
     SwitchClocks();
@@ -120,7 +123,19 @@ int main() {
                    rx_function = (test_function)(rx_payload->test);
                    if(rx_function != NULL) {
                        LED_2 = ~LED_2;
-                       (rx_function)(payGetType(rx_payload), payGetStatus(rx_payload), payGetDataLength(rx_payload), payGetData(rx_payload), rx_src_addr);
+                       payloadType = payGetType(rx_payload);
+                        payloadStatus = payGetStatus(rx_payload);
+                        payloadDataLength = payGetDataLength(rx_payload);
+                        payloadData = payGetData(rx_payload);
+                        // make debugging commands easier
+                           (rx_function)(payloadType, payloadStatus, payloadDataLength, payloadData, rx_src_addr);
+
+
+                     /*  (rx_function)(payGetType(rx_payload),
+                               payGetStatus(rx_payload),
+                               payGetDataLength(rx_payload),
+                               payGetData(rx_payload), rx_src_addr);
+                      * */
                    }
                }
                ppoolReturnFullPacket(rx_packet);
