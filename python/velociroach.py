@@ -286,7 +286,7 @@ class Velociroach:
             tries = tries + 1
             time.sleep(0.3)
             
-    def setGait(self, gaitConfig, zero_position = True):
+    def setGait(self, gaitConfig, zero_position = False):
         self.currentGait = gaitConfig
         
         self.clAnnounce()
