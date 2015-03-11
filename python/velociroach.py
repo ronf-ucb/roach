@@ -2,16 +2,17 @@ import glob
 import time
 import sys
 from lib import command
-from callbackFunc import xbee_received
+from callbackFunc_multi import xbee_received
 import datetime
 import serial
-import shared
+import shared_multi as shared
 from struct import pack,unpack
 from xbee import XBee
 from math import ceil,floor
 import numpy as np
 
 # TODO: check with firmware if this value is actually correct
+PHASE_0_DEG   = 0x0000
 PHASE_180_DEG = 0x8000
 
 class GaitConfig:
@@ -145,16 +146,16 @@ class Velociroach:
         time.sleep(0.1)
     
     #TODO: This may be a vestigial function. Check versus firmware.
-    def setMotorMode(self, mode):
-        self.clAnnounce()
-        print "Setting motor mode to", mode
-        self.tx( 0, command.SET_MOTOR_MODE, pack('h',mode))
-        time.sleep(0.1)
-            
-    def setZeroMotorPosition(self):
-        self.clAnnounce()
-        print "Zeroing motor position"
-        self.tx( 0, command.ZERO_POS, "Zero motor")
+    def setMotorMode(self, motorgains, retries = 8 ):
+        tries = 1
+        self.motorGains = motorgains
+        self.motor_gains_set = False
+        while not(self.motor_gains_set) and (tries <= retries):
+            self.clAnnounce()
+            print "Setting motor mode...   ",tries,"/8"
+            self.tx( 0, command.SET_MOTOR_MODE, pack('10h',*gains))
+            tries = tries + 1
+            time.sleep(0.1)
     
     ######TODO : sort out this function and flashReadback below
     def downloadTelemetry(self, timeout = 5, retry = True):
@@ -168,7 +169,7 @@ class Velociroach:
         shared.last_packet_time = dlStart
         #bytesIn = 0
         while self.telemtryData.count([]) > 0:
-            time.sleep(0.04)
+            time.sleep(0.02)
             dlProgress(self.numSamples - self.telemtryData.count([]) , self.numSamples)
             if (time.time() - shared.last_packet_time) > timeout:
                 print ""
@@ -218,9 +219,10 @@ class Velociroach:
         self.findFileName()
         self.writeFileHeader()
         fileout = open(self.dataFileName, 'a')
-        sanitized = [item for item in self.telemtryData if item]
+        
+        sanitized = [item for item in self.telemtryData if item!= []];
+        
         np.savetxt(fileout , np.array(sanitized), self.telemFormatString, delimiter = ',')
-        #np.savetxt(fileout , np.array(self.telemtryData), self.telemFormatString, delimiter = ',')
         fileout.close()
         self.clAnnounce()
         print "Telemetry data saved to", self.dataFileName
@@ -284,7 +286,7 @@ class Velociroach:
             tries = tries + 1
             time.sleep(0.3)
             
-    def setGait(self, gaitConfig):
+    def setGait(self, gaitConfig, zero_position = False):
         self.currentGait = gaitConfig
         
         self.clAnnounce()
@@ -292,12 +294,15 @@ class Velociroach:
         self.setPhase(gaitConfig.phase)
         self.setMotorGains(gaitConfig.motorgains)
         self.setVelProfile(gaitConfig) #whole object is passed in, due to several references
-        self.setZeroMotorPosition()
+        if zero_position:
+            self.zeroPosition()
         
         self.clAnnounce()
         print " ------------------------------------ "
         
-        
+    def zeroPosition(self):
+        self.tx( 0, command.ZERO_POS, 'zero') #actual data sent in packet is not relevant
+        time.sleep(0.1) #built-in holdoff, since reset apparently takes > 50ms
         
 ########## Helper functions #################
 #TODO: find a home for these? Possibly in BaseStation class (pullin, abuchan)
@@ -321,11 +326,11 @@ def xb_safe_exit(xb):
     print "Halting xb"
     if xb is not None:
         xb.halt()
-    else:
-        shared.xb.halt()
         
     print "Closing serial"
-    shared.ser.close()
+    if xb.serial is not None:
+        xb.serial.close()
+        
     print "Exiting..."
     sys.exit(1)
     

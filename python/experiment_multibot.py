@@ -10,7 +10,11 @@ The main function will send all the setup parameters to the robots, execute defi
 from lib import command
 import time,sys,os,traceback
 import serial
-import shared
+
+# Path to imageproc-settings repo must be added
+sys.path.append(os.path.dirname("../../imageproc-settings/"))
+sys.path.append(os.path.dirname("../imageproc-settings/"))  
+import shared_multi as shared
 
 from velociroach import *
 
@@ -20,8 +24,8 @@ EXIT_WAIT   = False
 def main():    
     xb = setupSerial(shared.BS_COMPORT, shared.BS_BAUDRATE)
     
-    R1 = Velociroach('\x21\x02', xb)
-    R1.SAVE_DATA = True    #TODO: getting flash erase to work is critical to function testing (pullin)
+    R1 = Velociroach('\x20\x52', xb)
+    R1.SAVE_DATA = True
                             
     #R1.RESET = False       #current roach code does not support software reset
     
@@ -46,7 +50,7 @@ def main():
     # Motor gains format:
     #  [ Kp , Ki , Kd , Kaw , Kff     ,  Kp , Ki , Kd , Kaw , Kff ]
     #    ----------LEFT----------        ---------_RIGHT----------
-    motorgains = [1800,200,100,0,0, 1800,200,100,0,0]
+    motorgains = [1800,0,100,0,0, 1800,0,100,0,0]
     #motorgains = [0,0,0,0,0 , 0,0,0,0,0]
 
     simpleAltTripod = GaitConfig(motorgains, rightFreq=5, leftFreq=5) # Parameters can be passed into object upon construction, as done here.
@@ -57,7 +61,6 @@ def main():
     
     # Configure intra-stride control
     R1.setGait(simpleAltTripod)
-    time.sleep(0.1)  #minor hack, due to timing
 
     # example , 0.1s lead in + 2s run + 0.1s lead out
     EXPERIMENT_RUN_TIME_MS     = 2000 #ms
@@ -98,17 +101,13 @@ def main():
     for r in shared.ROBOTS:
         if r.SAVE_DATA:
             raw_input("Press Enter to start telemetry read-back ...")
-            r.downloadTelemetry(timeout = 2)
+            r.downloadTelemetry()
     
     if EXIT_WAIT:  #Pause for a Ctrl + C , if desired
         while True:
-            try:
-                time.sleep(0.1)
-            except KeyboardInterrupt:
-                break
+            time.sleep(0.1)
 
     print "Done"
-    xb_safe_exit(xb)
     
 #Provide a try-except over the whole main function
 # for clean exit. The Xbee module should have better
@@ -119,17 +118,11 @@ if __name__ == '__main__':
         main()
     except KeyboardInterrupt:
         print "\nRecieved Ctrl+C, exiting."
-        shared.xb.halt()
-        shared.ser.close()
     except Exception as args:
-        print "\nGeneral exception:",args
+        print "\nGeneral exception from main:\n",args,'\n'
         print "\n    ******    TRACEBACK    ******    "
         traceback.print_exc()
         print "    *****************************    \n"
         print "Attempting to exit cleanly..."
-        shared.xb.halt()
-        shared.ser.close()
-        sys.exit()
-    except serial.serialutil.SerialException:
-        shared.xb.halt()
-        shared.ser.close()
+    finally:
+        xb_safe_exit(shared.xb)
