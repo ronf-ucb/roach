@@ -27,7 +27,7 @@
 
 #define PKT_UNPACK(type, var, pktframe) type* var = (type*)(pktframe);
 
-unsigned char (*cmd_func[MAX_CMD_FUNC])(unsigned char, unsigned char, unsigned char, unsigned char*);
+unsigned char (*cmd_func[MAX_CMD_FUNC])(unsigned char, unsigned char, unsigned char, unsigned char*, unsigned int);
 void cmdError(void);
 
 //extern pidPos pidObjs[NUM_PIDS];
@@ -173,7 +173,7 @@ unsigned char cmdEraseSectors(unsigned char type, unsigned char status, unsigned
 unsigned char cmdFlashReadback(unsigned char type, unsigned char status, unsigned char length, unsigned char *frame, unsigned int src_addr){
     PKT_UNPACK(_args_cmdFlashReadback, argsPtr, frame);
     
-    telemReadbackSamples(argsPtr->samples);
+    telemReadbackSamples(argsPtr->samples, src_addr);
     return 1;
 }
 
@@ -186,11 +186,7 @@ unsigned char cmdSetThrustOpenLoop(unsigned char type, unsigned char status, uns
 
     DisableIntT1;   // since PID interrupt overwrites PWM values
 
-    tiHSetDC(1, thrust1);
-    tiHSetDC(2, thrust2);
-    delay_ms(run_time_ms);
-    tiHSetDC(1,0);
-    tiHSetDC(2,0);
+    tiHSetDC(argsPtr->channel, argsPtr->dc);
 
     EnableIntT1;
     return 1;
@@ -218,10 +214,8 @@ unsigned char cmdSetThrustOpenLoop(unsigned char type, unsigned char status, uns
     pidSetGains(LEFT_LEGS_PID_NUM,
             argsPtr->Kp2,argsPtr->Ki2,argsPtr->Kd2,argsPtr->Kaw2, argsPtr->Kff2);
 
-    radioSendData(RADIO_DST_ADDR, status, CMD_SET_PID_GAINS, length, frame, 0); //TODO: Robot should respond to source of query, not hardcoded address
-    //Send confirmation packet
-    // WARNING: Will fail at high data throughput
-    //radioConfirmationPacket(RADIO_DEST_ADDR, CMD_SET_PID_GAINS, status, 20, frame);
+    radioSendData(src_addr, status, CMD_SET_PID_GAINS, length, frame, 0); //TODO: Robot should respond to source of query, not hardcoded address
+
     return 1; //success
 }
 
