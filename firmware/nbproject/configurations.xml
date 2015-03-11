@@ -28,6 +28,9 @@
         <itemPath>../../imageproc-lib/init_default.h</itemPath>
         <itemPath>../../imageproc-lib/utils.h</itemPath>
       </logicalFolder>
+      <logicalFolder name="f1" displayName="imageproc-settings" projectFiles="true">
+        <itemPath>../../imageproc-settings/settings.h</itemPath>
+      </logicalFolder>
       <logicalFolder name="lib" displayName="lib" projectFiles="true">
         <itemPath>../lib/cmd_const.h</itemPath>
         <itemPath>../lib/consts.h</itemPath>
@@ -40,7 +43,6 @@
         <itemPath>../lib/vr_telem.h</itemPath>
       </logicalFolder>
       <itemPath>source/cmd.h</itemPath>
-      <itemPath>source/settings.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -94,6 +96,7 @@
     <Elem>.</Elem>
     <Elem>../lib</Elem>
     <Elem>../../imageproc-lib</Elem>
+    <Elem>../../imageproc-settings</Elem>
   </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
@@ -123,7 +126,7 @@
       </compileType>
       <makeCustomizationType>
         <makeCustomizationPreStepEnabled>true</makeCustomizationPreStepEnabled>
-        <makeCustomizationPreStep>python ../../imageproc-lib/version.py 'DHALDANE_ROACH;AMS_ENC'</makeCustomizationPreStep>
+        <makeCustomizationPreStep>python ../../imageproc-lib/prebuild.py ../../imageproc-settings/settings.h</makeCustomizationPreStep>
         <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
         <makeCustomizationPostStep></makeCustomizationPostStep>
         <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
