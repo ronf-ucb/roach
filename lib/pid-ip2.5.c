@@ -84,11 +84,13 @@ void pidSetup() {
     //TODO: This should be generalized fo there is no sense of "left" and "right" here
     pidObjs[LEFT_LEGS_PID_NUM].output_channel  = LEFT_LEGS_TIH_CHAN;
     pidObjs[LEFT_LEGS_PID_NUM].p_state_flip    = LEFT_LEG_FLIP;
-    pidObjs[RIGHT_LEGS_PID_NUM].output_channel = LEFT_LEGS_TIH_CHAN;
+    pidObjs[LEFT_LEGS_PID_NUM].output_channel  = LEFT_LEGS_TIH_CHAN;
+    pidObjs[LEFT_LEGS_PID_NUM].encoder_num     = LEFT_LEGS_ENC_NUM;
 
     pidObjs[RIGHT_LEGS_PID_NUM].output_channel = RIGHT_LEGS_TIH_CHAN;
     pidObjs[RIGHT_LEGS_PID_NUM].p_state_flip   = RIGHT_LEG_FLIP;
     pidObjs[RIGHT_LEGS_PID_NUM].output_channel = RIGHT_LEGS_TIH_CHAN;
+    pidObjs[LEFT_LEGS_PID_NUM].encoder_num     = LEFT_LEGS_ENC_NUM;
 
     // Initialize PID structures before starting Timer1
     pidSetInput(LEFT_LEGS_PID_NUM, 0);
@@ -461,9 +463,11 @@ void pidGetState() {
     bemf[1] = pidObjs[1].inputOffset - adcGetMotorB(); // MotorB
     // only works to +-32K revs- might reset after certain number of steps? Should wrap around properly
     for (i = 0; i < NUM_PIDS; i++) {
-        int encPosition = amsEncoderGetPos(i);
-        int encOticks = amsEncoderGetOticks(i);
-        long encOffset = amsEncoderGetOffset(i);
+        unsigned char enc_num = pidObjs[i].encoder_num;
+        
+        int encPosition = amsEncoderGetPos(enc_num);
+        int encOticks = amsEncoderGetOticks(enc_num);
+        unsigned int encOffset = amsEncoderGetOffset(enc_num);
         p_state = (long) (encPosition << 2); // pos 14 bits 0x0 -> 0x3fff
         p_state = p_state + ((long)encOticks << 16);
         p_state = p_state - ((long)encOffset << 2); // subtract offset to get zero position
