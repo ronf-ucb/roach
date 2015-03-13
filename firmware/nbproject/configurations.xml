@@ -28,6 +28,9 @@
         <itemPath>../../imageproc-lib/init_default.h</itemPath>
         <itemPath>../../imageproc-lib/telem.h</itemPath>
       </logicalFolder>
+      <logicalFolder name="f1" displayName="imageproc-settings" projectFiles="true">
+        <itemPath>../../imageproc-settings/settings.h</itemPath>
+      </logicalFolder>
       <logicalFolder name="lib" displayName="lib" projectFiles="true">
         <itemPath>../lib/cmd_const.h</itemPath>
         <itemPath>../lib/consts.h</itemPath>
@@ -37,9 +40,6 @@
         <itemPath>../lib/pid-ip2.5.h</itemPath>
         <itemPath>../lib/tests.h</itemPath>
         <itemPath>../lib/vr_telem.h</itemPath>
-      </logicalFolder>
-      <logicalFolder name="f1" displayName="settings" projectFiles="true">
-        <itemPath>../../imageproc-settings/settings.h</itemPath>
       </logicalFolder>
       <itemPath>source/cmd.h</itemPath>
     </logicalFolder>
@@ -104,9 +104,9 @@
         <targetDevice>dsPIC33FJ128MC706A</targetDevice>
         <targetHeader></targetHeader>
         <targetPluginBoard></targetPluginBoard>
-        <platformTool>ICD3PlatformTool</platformTool>
+        <platformTool>RealICEPlatformTool</platformTool>
         <languageToolchain>XC16</languageToolchain>
-        <languageToolchainVersion></languageToolchainVersion>
+        <languageToolchainVersion>1.23</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -182,10 +182,11 @@
         <property key="false-conditionals" value="false"/>
         <property key="keep-locals" value="false"/>
         <property key="list-assembly" value="false"/>
-        <property key="list-file" value=""/>
         <property key="list-section-info" value="false"/>
         <property key="list-source" value="false"/>
         <property key="list-symbols" value="false"/>
+        <property key="oXC16asm-extra-opts" value=""/>
+        <property key="oXC16asm-list-to-file" value="false"/>
         <property key="omit-debug-dirs" value="false"/>
         <property key="omit-forms" value="false"/>
         <property key="preprocessor-macros" value=""/>
@@ -301,6 +302,7 @@
         <property key="memories.dataflash" value="true"/>
         <property key="memories.eeprom" value="true"/>
         <property key="memories.flashdata" value="true"/>
+        <property key="memories.id" value="true"/>
         <property key="memories.programmemory" value="true"/>
         <property key="memories.programmemory.end" value="0x157ff"/>
         <property key="memories.programmemory.partition2" value="true"/>
