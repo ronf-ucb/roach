@@ -67,41 +67,6 @@ int measLast1[NUM_PIDS];
 int measLast2[NUM_PIDS];
 int bemf[NUM_PIDS];
 
-//TODO: Check these for consistency with the default wiring diagram for VR
-//Default leg config
-//Left legs
-#ifndef LEFT_LEGS_PID_NUM
-#define LEFT_LEGS_PID_NUM       0       //PID module index is 0-3
-#endif
-#ifndef LEFT_LEGS_ENC_NUM
-#define LEFT_LEGS_ENC_NUM       0       //amsEnc module index is 0-3
-#endif
-#ifndef LEFT_LEGS_ENC_FLIP
-#define LEFT_LEGS_ENC_FLIP      0       //"forward" normal for left
-#endif
-#ifndef LEFT_LEGS_PWM_FLIP
-#define LEFT_LEGS_PWM_FLIP      1
-#endif
-#ifndef LEFT_LEGS_TIH_CHAN
-#define LEFT_LEGS_TIH_CHAN      2       //tiH module index is 1-4
-#endif
-//Right legs
-#ifndef RIGHT_LEGS_PID_NUM
-#define RIGHT_LEGS_PID_NUM      1       //PID module index is 0-3
-#endif
-#ifndef RIGHT_LEGS_ENC_NUM
-#define RIGHT_LEGS_ENC_NUM      1       //amsEnc module index is 0-3
-#endif
-#ifndef RIGHT_LEGS_FLIP
-#define RIGHT_LEGS_FLIP         1       //"forward" reversed for right
-#endif
-#ifndef RIGHT_LEGS_PWM_FLIP
-#define RIGHT_LEGS_PWM_FLIP     0
-#endif
-#ifndef RIGHT_LEGS_TIH_CHAN
-#define RIGHT_LEGS_TIH_CHAN     1       //tiH module index is 1-4
-#endif
-
 
 // -------------------------------------------
 // called from main()
