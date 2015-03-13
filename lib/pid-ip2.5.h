@@ -67,6 +67,7 @@ typedef struct
         unsigned char p_state_flip;     //boolean; flip or do not flip
         unsigned char output_channel;
         unsigned char encoder_num;
+        unsigned char pwm_flip;
 } pidPos;
 
 // structure for velocity control of leg cycle

@@ -67,6 +67,41 @@ int measLast1[NUM_PIDS];
 int measLast2[NUM_PIDS];
 int bemf[NUM_PIDS];
 
+//TODO: Check these for consistency with the default wiring diagram for VR
+//Default leg config
+//Left legs
+#ifndef LEFT_LEGS_PID_NUM
+#define LEFT_LEGS_PID_NUM       0       //PID module index is 0-3
+#endif
+#ifndef LEFT_LEGS_ENC_NUM
+#define LEFT_LEGS_ENC_NUM       0       //amsEnc module index is 0-3
+#endif
+#ifndef LEFT_LEGS_ENC_FLIP
+#define LEFT_LEGS_ENC_FLIP      0       //"forward" normal for left
+#endif
+#ifndef LEFT_LEGS_PWM_FLIP
+#define LEFT_LEGS_PWM_FLIP      1
+#endif
+#ifndef LEFT_LEGS_TIH_CHAN
+#define LEFT_LEGS_TIH_CHAN      2       //tiH module index is 1-4
+#endif
+//Right legs
+#ifndef RIGHT_LEGS_PID_NUM
+#define RIGHT_LEGS_PID_NUM      1       //PID module index is 0-3
+#endif
+#ifndef RIGHT_LEGS_ENC_NUM
+#define RIGHT_LEGS_ENC_NUM      1       //amsEnc module index is 0-3
+#endif
+#ifndef RIGHT_LEGS_FLIP
+#define RIGHT_LEGS_FLIP         1       //"forward" reversed for right
+#endif
+#ifndef RIGHT_LEGS_PWM_FLIP
+#define RIGHT_LEGS_PWM_FLIP     0
+#endif
+#ifndef RIGHT_LEGS_TIH_CHAN
+#define RIGHT_LEGS_TIH_CHAN     1       //tiH module index is 1-4
+#endif
+
 
 // -------------------------------------------
 // called from main()
@@ -83,14 +118,14 @@ void pidSetup() {
 
     //TODO: This should be generalized fo there is no sense of "left" and "right" here
     pidObjs[LEFT_LEGS_PID_NUM].output_channel  = LEFT_LEGS_TIH_CHAN;
-    pidObjs[LEFT_LEGS_PID_NUM].p_state_flip    = LEFT_LEG_FLIP;
-    pidObjs[LEFT_LEGS_PID_NUM].output_channel  = LEFT_LEGS_TIH_CHAN;
+    pidObjs[LEFT_LEGS_PID_NUM].p_state_flip    = LEFT_LEGS_ENC_FLIP;
     pidObjs[LEFT_LEGS_PID_NUM].encoder_num     = LEFT_LEGS_ENC_NUM;
+    pidObjs[LEFT_LEGS_PID_NUM].pwm_flip        = LEFT_LEGS_PWM_FLIP;
 
     pidObjs[RIGHT_LEGS_PID_NUM].output_channel = RIGHT_LEGS_TIH_CHAN;
-    pidObjs[RIGHT_LEGS_PID_NUM].p_state_flip   = RIGHT_LEG_FLIP;
-    pidObjs[RIGHT_LEGS_PID_NUM].output_channel = RIGHT_LEGS_TIH_CHAN;
-    pidObjs[LEFT_LEGS_PID_NUM].encoder_num     = LEFT_LEGS_ENC_NUM;
+    pidObjs[RIGHT_LEGS_PID_NUM].p_state_flip   = RIGHT_LEGS_FLIP;
+    pidObjs[RIGHT_LEGS_PID_NUM].encoder_num    = RIGHT_LEGS_ENC_NUM;
+    pidObjs[RIGHT_LEGS_PID_NUM].pwm_flip       = RIGHT_LEGS_PWM_FLIP;
 
     // Initialize PID structures before starting Timer1
     pidSetInput(LEFT_LEGS_PID_NUM, 0);
@@ -378,9 +413,9 @@ void __attribute__((interrupt, no_auto_psv)) _T1Interrupt(void) {
                 }
             }
         }
-        if (pidObjs[0].mode == 0) {
+        if (pidObjs[0].mode == PID_MODE_CONTROLED) {
             pidSetControl();
-        } else if (pidObjs[0].mode == 1) {
+        } else if (pidObjs[0].mode == PID_MODE_PWMPASS) {
             tiHSetDC(pidObjs[0].output_channel, pidObjs[0].pwmDes);
             tiHSetDC(pidObjs[1].output_channel, pidObjs[1].pwmDes);
         }
@@ -441,6 +476,10 @@ void checkSwapBuff(int j) {
 void pidGetState() {
     int i;
     long p_state;
+    int enc_num;
+    int encPosition, encOticks;
+    unsigned int encOffset;
+
     unsigned long time_start, time_end;
     //	calib_flag = 0;  //BEMF disable
     // get diff amp offset with motor off at startup time
@@ -463,15 +502,18 @@ void pidGetState() {
     bemf[1] = pidObjs[1].inputOffset - adcGetMotorB(); // MotorB
     // only works to +-32K revs- might reset after certain number of steps? Should wrap around properly
     for (i = 0; i < NUM_PIDS; i++) {
-        unsigned char enc_num = pidObjs[i].encoder_num;
+        enc_num = pidObjs[i].encoder_num;
         
-        int encPosition = amsEncoderGetPos(enc_num);
-        int encOticks = amsEncoderGetOticks(enc_num);
-        unsigned int encOffset = amsEncoderGetOffset(enc_num);
-        p_state = (long) (encPosition << 2); // pos 14 bits 0x0 -> 0x3fff
+        encPosition = amsEncoderGetPos(enc_num);
+        encOticks = amsEncoderGetOticks(enc_num);
+        encOffset = amsEncoderGetOffset(enc_num);
+
+        p_state =  (long)encPosition << 2; // pos 14 bits 0x0 -> 0x3fff
         p_state = p_state + ((long)encOticks << 16);
         p_state = p_state - ((long)encOffset << 2); // subtract offset to get zero position
 
+        pidObjs[i].p_state = p_state;
+        
         if(pidObjs[i].p_state_flip){
             pidObjs[i].p_state = -pidObjs[i].p_state;
         }
@@ -564,8 +606,19 @@ void pidSetControl() {
 
     if (pidObjs[0].onoff && pidObjs[1].onoff) // both motors on to run
     {
-        tiHSetDC(pidObjs[0].output_channel, pidObjs[0].output);
-        tiHSetDC(pidObjs[1].output_channel, pidObjs[1].output);
+        if(pidObjs[0].pwm_flip){
+            tiHSetDC(pidObjs[0].output_channel, -pidObjs[0].output);
+        }
+        else{
+            tiHSetDC(pidObjs[0].output_channel, pidObjs[0].output);
+        }
+        
+        if(pidObjs[1].pwm_flip){
+            tiHSetDC(pidObjs[1].output_channel, -pidObjs[1].output);
+        }
+        else{
+            tiHSetDC(pidObjs[1].output_channel, pidObjs[1].output);
+        }
     }
     else // turn off motors if PID loop is off
     {

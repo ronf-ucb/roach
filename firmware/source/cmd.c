@@ -146,6 +146,7 @@ unsigned char cmdStartTimedRun(unsigned char type, unsigned char status, unsigne
     }
     
     pidSetMode(LEFT_LEGS_PID_NUM ,PID_MODE_CONTROLED);
+    pidSetMode(RIGHT_LEGS_PID_NUM ,PID_MODE_CONTROLED);
 
     pidStartTimedTrial(argsPtr->run_time);
 
@@ -167,6 +168,10 @@ unsigned char cmdEraseSectors(unsigned char type, unsigned char status, unsigned
     PKT_UNPACK(_args_cmdEraseSector, argsPtr, frame);
 
     telemErase(argsPtr->samples);
+
+    //Send confirmation packet; this only happens when flash erase is completed.
+    radioSendData(src_addr, 0, CMD_ERASE_SECTORS, length, frame, 0);
+
     LED_RED = ~LED_RED;
     return 1;
 }
@@ -211,7 +216,7 @@ unsigned char cmdSetThrustOpenLoop(unsigned char type, unsigned char status, uns
     pidSetGains(LEFT_LEGS_PID_NUM,
             argsPtr->Kp1,argsPtr->Ki1,argsPtr->Kd1,argsPtr->Kaw1, argsPtr->Kff1);
 
-    pidSetGains(LEFT_LEGS_PID_NUM,
+    pidSetGains(RIGHT_LEGS_PID_NUM,
             argsPtr->Kp2,argsPtr->Ki2,argsPtr->Kd2,argsPtr->Kaw2, argsPtr->Kff2);
 
     radioSendData(src_addr, status, CMD_SET_PID_GAINS, length, frame, 0); //TODO: Robot should respond to source of query, not hardcoded address
