@@ -474,8 +474,8 @@ void pidGetState() {
         encOffset = amsEncoderGetOffset(enc_num);
 
         p_state =  (long)encPosition << 2; // pos 14 bits 0x0 -> 0x3fff
-        p_state = p_state + ((long)encOticks << 16);
         p_state = p_state - ((long)encOffset << 2); // subtract offset to get zero position
+        p_state = p_state + ((long)encOticks << 16);
 
         pidObjs[i].p_state = p_state;
         
