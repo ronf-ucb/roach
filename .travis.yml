@@ -2,7 +2,7 @@ language: c
 # whitelist
 branches:
   only:
-    - master
+    - autobuild-test
 
 addons:
   apt:
