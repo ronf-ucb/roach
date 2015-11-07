@@ -4,6 +4,8 @@ branches:
   only:
     - autobuild-test
 
+sudo: false
+
 addons:
   apt:
     packages:
