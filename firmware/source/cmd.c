@@ -1,3 +1,4 @@
+#include "settings.h"
 #include "cmd.h"
 #include "cmd_const.h"
 #include "dfmem.h"
@@ -12,7 +13,6 @@
 #include "radio.h"
 #include "dfmem.h"
 #include "version.h"
-#include "settings.h"
 #include "timer.h"
 #include "tih.h"
 #include "pid-ip2.5.h"

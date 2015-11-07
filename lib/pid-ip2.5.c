@@ -10,6 +10,7 @@
  */
 #include <xc.h>
 #include "timer.h"
+#include "settings.h"
 #include "pid-ip2.5.h"
 #include "dfmem.h"
 #include "adc_pid.h"
