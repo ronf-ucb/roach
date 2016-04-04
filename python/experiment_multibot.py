@@ -51,11 +51,12 @@ def main():
     #  [ Kp , Ki , Kd , Kaw , Kff     ,  Kp , Ki , Kd , Kaw , Kff ]
     #    ----------LEFT----------        ---------_RIGHT----------
     #motorgains = [1800,0,100,0,0, 1800,0,100,0,0]
-    motorgains = [200,200,0,0,0 , 200,200,0,0,0]
+    #motorgains = [0,0,400,0,0 , 0,0,400,0,0]
+    motorgains = [0,0,400,0,-900,0,0,500,0,600]
 
     simpleAltTripod = GaitConfig(motorgains, rightFreq=1, leftFreq=1) # Parameters can be passed into object upon construction, as done here.
     simpleAltTripod.phase = PHASE_180_DEG                             # Or set individually, as here
-    simpleAltTripod.deltasLeft = [0.25, 0.25, 0.25]
+    simpleAltTripod.deltasLeft = [-0.25, -0.25, -0.25]
     simpleAltTripod.deltasRight = [0.25, 0.25, 0.25]
     #simpleAltTripod.deltasTime  = [0.25, 0.25, 0.25] # Not current supported by firmware; time deltas are always exactly [0.25, 0.25, 0.25, 0.25]
     
@@ -63,7 +64,7 @@ def main():
     R1.setGait(simpleAltTripod)
 
     # example , 0.1s lead in + 2s run + 0.1s lead out
-    EXPERIMENT_RUN_TIME_MS     = 2000 #ms
+    EXPERIMENT_RUN_TIME_MS     = 6500 #ms
     EXPERIMENT_LEADIN_TIME_MS  = 100  #ms
     EXPERIMENT_LEADOUT_TIME_MS = 100  #ms
     

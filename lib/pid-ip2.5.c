@@ -394,7 +394,8 @@ void __attribute__((interrupt, no_auto_psv)) _T1Interrupt(void) {
 // update desired velocity and position tracking setpoints for each leg
 
 void pidGetSetpoint(int j) {
-    int index;
+    int index; 
+    long temp_v; // needed for velocity scaling to A/D units
     index = pidObjs[j].index;
     // update desired position between setpoints, scaled by 256
     pidObjs[j].interpolate += (long) activePID[j]->vel[index];
@@ -411,7 +412,10 @@ void pidGetSetpoint(int j) {
             checkSwapBuff(j);
         }
         pidObjs[j].expire += activePID[j]->interval[pidObjs[j].index]; // expire time for next interval
-        pidObjs[j].v_input = (activePID[j]->vel[pidObjs[j].index]); //update to next velocity
+        // fix to make relative to back emf in A/D units
+        //pidObjs[j].v_input = (activePID[j]->vel[pidObjs[j].index]); //update to next velocity
+        temp_v = ((long)(activePID[j]->vel[pidObjs[j].index]) * K_EMF)>>8;  // scale velocity to A/D units
+		pidObjs[j].v_input = (int)(temp_v);	  //update to next velocity 		
     }
 }
 
@@ -435,7 +439,7 @@ void checkSwapBuff(int j) {
 
 // select either back emf or backwd diff for vel est
 
-#define VEL_BEMF 0
+#define VEL_BEMF 1
 
 /* update state variables including motor position and velocity */
 

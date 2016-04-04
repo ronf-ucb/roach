@@ -233,16 +233,21 @@ class Velociroach:
         today = time.localtime()
         date = str(today.tm_year)+'/'+str(today.tm_mon)+'/'+str(today.tm_mday)+'  '
         date = date + str(today.tm_hour) +':' + str(today.tm_min)+':'+str(today.tm_sec)
-        fileout.write('%  Data file recorded ' + date + '\n')
-
-        fileout.write('%  Stride Frequency         = ' +repr( [ self.currentGait.leftFreq, self.currentGait.leftFreq]) + '\n')
-        fileout.write('%  Lead In /Lead Out        = ' + '\n')
-        fileout.write('%  Deltas (Fractional)      = ' + repr(self.currentGait.deltasLeft) + ',' + repr(self.currentGait.deltasRight) + '\n')
-        fileout.write('%  Phase                    = ' + repr(self.currentGait.phase) + '\n')
-            
+        fileout.write('"%  Data file recorded ' + date + '\n')
+        if 1:   # duncan version
+            fileout.write('"% Right Stride Frequency         = 0"\n"')
+            fileout.write('"% Left Stride Frequency         = 0"\n')
+            fileout.write('"% Phase (Fractional)        = 0"\n')
+        if 0:
+            fileout.write('%  Stride Frequency         = ' +repr( [ self.currentGait.leftFreq, self.currentGait.leftFreq]) + '\n')
+            fileout.write('%  Lead In /Lead Out        = ' + '\n')
+            fileout.write('%  Deltas (Fractional)      = ' + repr(self.currentGait.deltasLeft) + ',' + repr(self.currentGait.deltasRight) + '\n')
+            fileout.write('%  Phase                    = ' + repr(self.currentGait.phase) + '\n')
+           
         fileout.write('%  Experiment.py \n')
         fileout.write('%  Motor Gains    = ' + repr(self.currentGait.motorgains) + '\n')
         fileout.write('% Columns: \n')
+    
         # order for wiring on RF Turner
         fileout.write('% time | Right Leg Pos | Left Leg Pos | Commanded Right Leg Pos | Commanded Left Leg Pos | DCR | DCL | GyroX | GryoY | GryoZ | AX | AY | AZ | RBEMF | LBEMF | VBatt\n')
         fileout.close()
